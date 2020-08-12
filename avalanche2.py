@@ -22,6 +22,7 @@ import datetime
 import plotly.tools as tls
 import plotly.express as px
 import os
+from sklearn.preprocessing import LabelEncoder
 
 #Import csv of data from CAIC
 os.path.isfile('/Users/AnnaD/Desktop/avalanche')
@@ -99,6 +100,10 @@ def set_order(row):
         return "h"
 count_month = count_month.assign(order = count_month.apply(set_order,axis=1))
 
+#I label encoded aspects
+labelencoder = LabelEncoder()
+avalanche['aspect'] = avalanche['aspect'].astype(str)
+avalanche["aspect_encoded"]=labelencoder.fit_transform(avalanche["aspect"])
 
 # In[12]: I created dataframes for each month
 
@@ -206,6 +211,11 @@ fig.show()
 
 count_angle = pd.DataFrame(avalanche.groupby('angle').count()['avalanche']).reset_index()
 count_angle= count_angle.rename(columns={"avalanche": "Count"})
+avalanche['avi_month_num'] = pd.DatetimeIndex(avalanche['avi_date'])
+avalanche['day_of_week'] = avalanche['avi_date'].dt.dayofweek
+avalanche['weekend_ind'] = 0
+avalanche.loc[avalanche['day_of_week'].isin([5, 6]), 'weekend_ind'] = 1
+
 
 #ensure all measurments are in ft
 
@@ -215,8 +225,17 @@ avalanche['site_elev_units'].value_counts()
 
 # In[20]: column to indicate whether or not there were deaths
 avalanche["Deaths"] = avalanche['no_killed'].apply(lambda x: 1 if x > 0 else 0)
-heatmapfont = avalanche.drop(columns = ['acc_id','avalanche'] )
-corr = heatmapfont.corr()# plot the heatmap plt.subplots(figsize=(20,15))
-plt.title('Correlation Heatmap Avalanches')
-sns.heatmap(corr, xticklabels=corr.columns, yticklabels=corr.columns, annot=True, cmap=sns.diverging_palette(220, 20, as_cmap=True))
-sns.heatmap(corr)
+
+heatmap = avalanche.drop(columns = ['acc_id','avalanche', 'no_killed','no_injured','no_non_crit'] )
+
+avicorr = heatmap.corr()
+#Plot figsize
+fig, ax = plt.subplots(figsize=(10, 8))
+#Generate Heat Map, allow annotations and place floats in map
+sns.heatmap(avicorr, cmap='viridis_r', annot=True, fmt=".2f")
+#Apply xticks
+plt.xticks(range(len(avicorr.columns)), avicorr.columns)
+#Apply yticks
+plt.yticks(range(len(avicorr.columns)), avicorr.columns)
+#show plot
+plt.show()
