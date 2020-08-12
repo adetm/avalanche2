@@ -1,3 +1,5 @@
+#Import packages
+
 import numpy as np
 import pandas as pd
 import math
@@ -21,29 +23,29 @@ import plotly.tools as tls
 import plotly.express as px
 import os
 
-
+#Import csv of data from CAIC
 os.path.isfile('/Users/AnnaD/Desktop/avalanche')
 avalanche= pd.read_csv('/Users/AnnaD/Desktop/avalanche/2CAIC_AccDB_Investigations.csv')
 avalanche = avalanche.iloc[:,0:39]
 
-# In[5]:
+# In[5]: used iloc to omit the last columns and rows with nan
 avalanche = avalanche.iloc[:347,:]
 
 
-# In[6]:
+# In[6]: change column to datetime
 avalanche['date_modified']=pd.to_datetime(avalanche['date_modified'])
 avalanche['avi_date']=pd.to_datetime(avalanche['avi_date'])
 avalanche['month'] = avalanche['avi_date'].dt.month_name()
 
 
-# In[7]:
+# In[7]: most avalanches happen on NE slopes
 
 
 count_aspect = pd.DataFrame(avalanche.groupby('aspect').count()['avalanche']).reset_index()
 count_aspect
 
 
-# In[8]:
+# In[8]: I wanted to make a bar_polar plot and needed to sort columns
 
 
 order=(['c','a','b','h','e','d','f','g'])
@@ -68,14 +70,14 @@ fig.show()
 # In[10]:
 
 
-#January, February, March, December, April
+#I wanted to group by month in order to see changes in avalanche aspect by month
 count_month = pd.DataFrame(avalanche.groupby(['month','aspect']).count())
 count_month = count_month['avalanche']
 count_month = count_month.to_frame()
 count_month.reset_index(inplace=True)
 
 
-# In[11]:
+# In[11]: in order to sort by N,NE,E,SE, etc I assigned a letter to later sort by that column
 
 
 def set_order(row):
@@ -98,7 +100,7 @@ def set_order(row):
 count_month = count_month.assign(order = count_month.apply(set_order,axis=1))
 
 
-# In[12]:
+# In[12]: I created dataframes for each month
 
 
 april_count = count_month[0:6]
@@ -115,7 +117,7 @@ october_count = count_month[43:]
 # In[13]:
 
 
-#created dummy columns
+#created dummy columns and imputed 0s when months didn't have avalanches in certain aspects
 february_count.loc[-1]=['February','SW', 0,'f']
 february_count.index=february_count.index +1
 december_count.loc[-1]=['December','SW', 0,'f']
@@ -134,7 +136,7 @@ november_count = november_count.sort_values(['order'])
 october_count = october_count.sort_values(['order'])
 
 
-# In[15]:
+# In[15]: most of the avalances in December were mostl in NE  aspects
 
 
 fig = px.bar_polar(r=december_count["avalanche"],
@@ -147,10 +149,7 @@ fig.update_layout(
         })
 
 
-# In[16]:
-
-
-
+# In[16]: avalanches in January were also mostly in NE aspects
 
 fig = px.bar_polar(r=january_count["avalanche"],
                     theta=january_count['aspect'], )
@@ -166,7 +165,7 @@ fig.update_layout(
 fig.show()
 
 
-# In[17]:
+# In[17]: in February, avalanches were mostly in SE aspects
 
 
 fig = px.bar_polar(r=february_count["avalanche"],
@@ -185,7 +184,7 @@ fig.update_layout(
 fig.show()
 
 
-# In[18]:
+# In[18]: again, in March most of the avalanches were in NE aspects
 
 
 fig = px.bar_polar(r=march_count["avalanche"],
@@ -208,153 +207,16 @@ fig.show()
 count_angle = pd.DataFrame(avalanche.groupby('angle').count()['avalanche']).reset_index()
 count_angle= count_angle.rename(columns={"avalanche": "Count"})
 
+#ensure all measurments are in ft
 
-# In[20]:
+avalanche['site_elev_units'].value_counts()
 
 
-avalanche['no_killed'].fillna(0,inplace=True)
 
-
-# In[21]:
-
-
-avalanche['no_killed'].value_counts()
-
-
-# In[22]:
-
-
-avalanche["Binary_Deaths"] = avalanche['no_killed'].apply(lambda x: 1 if x > 0 else 0)
-
-
-# In[ ]:
-
-
-
-
-
-# In[23]:
-
-
-avalanche2 =avalanche.copy()
-
-
-# In[24]:
-
-
-avalanche2['text'] =avalanche2.apply(lambda x:'%s %s %s %s %s' % (x['description'],x['acc_sum_pub'], x['comments_pub'], x['rescue_sum_pub'],x['wx_sum_pub']),axis=1)
-
-
-# In[25]:
-
-
-avalanche3 = avalanche2.filter(items=['text'])
-
-
-# In[26]:
-
-
-avalanche3.head()
-
-
-# In[27]:
-
-
-avalanche = pd.concat([avalanche, avalanche3], axis='columns')
-avalanche
-
-
-# In[28]:
-
-
-
-
-
-# In[29]:
-
-
-text_avalanche = avalanche[['text','Binary_Deaths']]
-text_avalanche
-
-
-# In[ ]:
-
-
-avalanche = avalanche.fillna(0,inplace=True)
-
-
-# In[ ]:
-
-
-X = text_avalanche['text']
-y = text_avalanche['Binary_Deaths']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
-
-
-# In[ ]:
-
-
-X = X.values.reshape(-1,1)
-print(X_train.shape)
-print(y_train.shape)
-
-
-# In[ ]:
-
-
-stemmer = nltk.stem.PorterStemmer()
-
-
-# In[ ]:
-
-
-from sklearn.feature_extraction.text import CountVectorizer
-# 1. Instantiate
-bagofwords = CountVectorizer(stop_words = "english", ngram_range =(1,4))
-
-# 2. Fit
-bagofwords.fit(X_train)
-
-# 3. Transform
-X_train = bagofwords.transform(X_train)
-X_test=bagofwords.transform(X_test)
-
-
-# In[ ]:
-
-
-# these are now the features, they are the individual tokens
-bagofwords.get_feature_names()
-
-
-# In[ ]:
-
-
-X_train.toarray()
-text= pd.DataFrame(columns=bagofwords.get_feature_names(), data=X_train.toarray())
-display(text)
-
-
-# In[ ]:
-
-
-from sklearn.linear_model import LogisticRegression
-logreg = LogisticRegression()
-logreg.fit(X_train, y_train)
-# Training score
-logreg.score(X_train,y_train)
-
-
-# In[ ]:
-
-
-coefficients = logreg.coef_
-coefficients
-
-
-indices = coefficients.argsort()[0]
-# The words with the lowest coefficients
-# most predictive of a 0 (negative review)
-top20 = np.array(bagofwords.get_feature_names())[indices[:20]]
-top20
+# In[20]: column to indicate whether or not there were deaths
+avalanche["Deaths"] = avalanche['no_killed'].apply(lambda x: 1 if x > 0 else 0)
+heatmapfont = avalanche.drop(columns = ['acc_id','avalanche'] )
+corr = heatmapfont.corr()# plot the heatmap plt.subplots(figsize=(20,15))
+plt.title('Correlation Heatmap Avalanches')
+sns.heatmap(corr, xticklabels=corr.columns, yticklabels=corr.columns, annot=True, cmap=sns.diverging_palette(220, 20, as_cmap=True))
+sns.heatmap(corr)
