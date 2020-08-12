@@ -353,21 +353,8 @@ coefficients = logreg.coef_
 coefficients
 
 
-# In[ ]:
-
-
-X_test
-
-
-# In[ ]:
-
-
-
-
-# In[ ]:
-
-
 indices = coefficients.argsort()[0]
 # The words with the lowest coefficients
 # most predictive of a 0 (negative review)
-poscoeffword = np.array(column_names)[indices[:20]]
+top20 = np.array(bagofwords.get_feature_names())[indices[:20]]
+top20
