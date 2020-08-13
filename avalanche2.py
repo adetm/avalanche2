@@ -103,7 +103,17 @@ count_month = count_month.assign(order = count_month.apply(set_order,axis=1))
 #I label encoded aspects
 labelencoder = LabelEncoder()
 avalanche['aspect'] = avalanche['aspect'].astype(str)
+avalanche['travel_mode'] = avalanche['travel_mode'].astype(str)
+avalanche['avi_trigger'] = avalanche['avi_trigger'].astype(str)
+avalanche['avi_trigger2'] = avalanche['avi_trigger2'].astype(str)
+avalanche['travel_mode'] = avalanche['travel_mode'].astype(str)
+avalanche['activity'] = avalanche['activity'].astype(str)
+avalanche['travel_mode_encoded']=labelencoder.fit_transform(avalanche["travel_mode"])
 avalanche["aspect_encoded"]=labelencoder.fit_transform(avalanche["aspect"])
+avalanche['avi_triggerencoded']=labelencoder.fit_transform(avalanche["avi_trigger"])
+avalanche['avi_trigger2encoded']=labelencoder.fit_transform(avalanche["avi_trigger2"])
+avalanche['travel_mode_encoded']=labelencoder.fit_transform(avalanche["travel_mode"])
+avalanche['activity_encoded']=labelencoder.fit_transform(avalanche["activity"])
 
 # In[12]: I created dataframes for each month
 
@@ -139,6 +149,15 @@ march_count = march_count.sort_values(['order'])
 may_count = may_count.sort_values(['order'])
 november_count = november_count.sort_values(['order'])
 october_count = october_count.sort_values(['order'])
+
+april_count
+april_count['pcnt_aspect'] =(april_count.avalanche/ april_count.avalanche.sum())*100
+december_count['pcnt_aspect'] =(december_count.avalanche/ december_count.avalanche.sum())*100
+february_count['pcnt_aspect'] =(february_count.avalanche/ february_count.avalanche.sum())*100
+january_count['pcnt_aspect'] =(january_count.avalanche/ january_count.avalanche.sum())*100
+march_count['pcnt_aspect'] =(march_count.avalanche/ march_count.avalanche.sum())*100
+november_count['pcnt_aspect'] =(november_count.avalanche/ november_count.avalanche.sum())*100
+october_count['pcnt_aspect'] =(october_count.avalanche/ october_count.avalanche.sum())*100
 
 
 # In[15]: most of the avalances in December were mostl in NE  aspects
@@ -184,8 +203,6 @@ fig.update_layout(
 
         'yanchor': 'top'})
 
-
-
 fig.show()
 
 
@@ -211,15 +228,16 @@ fig.show()
 
 count_angle = pd.DataFrame(avalanche.groupby('angle').count()['avalanche']).reset_index()
 count_angle= count_angle.rename(columns={"avalanche": "Count"})
+
 avalanche['avi_month_num'] = pd.DatetimeIndex(avalanche['avi_date'])
 avalanche['day_of_week'] = avalanche['avi_date'].dt.dayofweek
 avalanche['weekend_ind'] = 0
 avalanche.loc[avalanche['day_of_week'].isin([5, 6]), 'weekend_ind'] = 1
-
+avalanche['int_month']= avalanche['avi_month_num'].astype(int)
 
 #ensure all measurments are in ft
 
-avalanche['site_elev_units'].value_counts()
+
 
 
 
@@ -238,4 +256,14 @@ plt.xticks(range(len(avicorr.columns)), avicorr.columns)
 #Apply yticks
 plt.yticks(range(len(avicorr.columns)), avicorr.columns)
 #show plot
-plt.show()
+
+avalanche_bymonth = avalanche.filter(['month','avalanche'])
+
+avalanche_bymonth = avalanche_bymonth.groupby(['avalanche']).sum()
+avalanche_bymonth
+
+fig = go.Figure(
+    data=[go.Bar(y=avalanche_bymonth['avalanche'])],
+    layout_title_text="A Figure Displayed with fig.show()",
+)
+fig.show()
