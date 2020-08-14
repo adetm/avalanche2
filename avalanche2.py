@@ -233,7 +233,7 @@ avalanche['avi_month_num'] = pd.DatetimeIndex(avalanche['avi_date'])
 avalanche['day_of_week'] = avalanche['avi_date'].dt.dayofweek
 avalanche['weekend_ind'] = 0
 avalanche.loc[avalanche['day_of_week'].isin([5, 6]), 'weekend_ind'] = 1
-avalanche['int_month']= avalanche['avi_month_num'].astype(int)
+#avalanche['int_month']= avalanche['avi_month_num'].astype(int)
 
 #ensure all measurments are in ft
 
@@ -257,9 +257,11 @@ plt.xticks(range(len(avicorr.columns)), avicorr.columns)
 plt.yticks(range(len(avicorr.columns)), avicorr.columns)
 #show plot
 
-avalanche_bymonth = avalanche.filter(['month','avalanche'])
+avalanche_bymonth = avalanche.filter(['int_month','avalanche'])
 
-avalanche_bymonth = avalanche_bymonth.groupby(['avalanche']).sum()
+
+
+avalanche_bymonth = avalanche_bymonth.groupby(['int_month']).sum().reset_index()
 avalanche_bymonth
 
 fig = go.Figure(
