@@ -23,6 +23,8 @@ import plotly.tools as tls
 import plotly.express as px
 import os
 from sklearn.preprocessing import LabelEncoder
+import chart_studio
+chart_studio.tools.set_credentials_file(username='dlomted', api_key='••••••••••')
 
 #Import csv of data from CAIC
 os.path.isfile('/Users/AnnaD/Desktop/avalanche')
@@ -161,11 +163,14 @@ november_count['pcnt_aspect'] =(november_count.avalanche/ november_count.avalanc
 october_count['pcnt_aspect'] =(october_count.avalanche/ october_count.avalanche.sum())*100
 
 
-# In[15]: most of the avalances in December were mostl in NE  aspects
 
 
-fig = px.bar_polar(r=december_count["avalanche"],
-                    theta=december_count['aspect'], )
+
+
+
+
+fig=px.bar_polar(r=december_count["avalanche"],
+                    theta=december_count['aspect'] )
 fig.update_layout(
     title={
         'text': "December",
@@ -173,29 +178,19 @@ fig.update_layout(
         'x':0.5,
         })
 
-
-# In[16]: avalanches in January were also mostly in NE aspects
-
-fig = px.bar_polar(r=january_count["avalanche"],
-                    theta=january_count['aspect'], )
-fig.update_layout(
+fig2=px.bar_polar(r=january_count["avalanche"],
+                    theta=january_count['aspect'])
+fig2.update_layout(
     title={
         'text': "January",
         'y':0.11,
         'x':0.5,
         'xanchor': 'center',
-
         'yanchor': 'top'}, polar_radialaxis_ticksuffix='')
 
-
-
-
-# In[17]: in February, avalanches were mostly in SE aspects
-
-
-fig = px.bar_polar(r=february_count["avalanche"],
+fig3 = px.bar_polar(r=february_count["avalanche"],
                     theta=february_count['aspect'] )
-fig.update_layout(
+fig3.update_layout(
     title={
         'text': "February",
         'y':0.11,
@@ -203,25 +198,31 @@ fig.update_layout(
         'xanchor': 'center',
 
         'yanchor': 'top'})
+fig4 = px.bar_polar(r=february_count["avalanche"],
+                    theta=february_count['aspect'] )
+fig4.update_layout(
+    title={
+        'text': "February",
+        'y':0.11,
+        'x':0.5,
+        'xanchor': 'center',
 
+        'yanchor': 'top'})
 fig.show()
+fig2.show()
+fig3.show()
+
+
+
+
+
+
 
 
 # In[18]: again, in March most of the avalanches were in NE aspects
 
 
-fig = px.bar_polar(r=march_count["avalanche"],
-                    theta=march_count['aspect'], )
-fig.update_layout(
-    title={
-        'text': "March",
-        'y':0.11,
-        'x':0.5,
-        'xanchor': 'center',
 
-        'yanchor': 'top'}, polar_radialaxis_ticksuffix='')
-
-fig.show()
 
 
 # In[19]:
