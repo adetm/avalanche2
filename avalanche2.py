@@ -37,11 +37,12 @@ avalanche = avalanche.iloc[:347,:]
 avalanche['date_modified']=pd.to_datetime(avalanche['date_modified'])
 avalanche['avi_date']=pd.to_datetime(avalanche['avi_date'])
 avalanche['month'] = avalanche['avi_date'].dt.month_name()
-
-
+avalanche['dt_month'] = avalanche['avi_date'].dt.month
+avalanche['year'] = avalanche['avi_date'].dt.year
 # In[7]: most avalanches happen on NE slopes
 
-
+count_year = pd.DataFrame(avalanche.groupby('year').count()['avalanche']).reset_index()
+count_year
 count_aspect = pd.DataFrame(avalanche.groupby('aspect').count()['avalanche']).reset_index()
 count_aspect
 
@@ -69,7 +70,7 @@ fig.show()
 
 
 # In[10]:
-
+avalanche
 
 #I wanted to group by month in order to see changes in avalanche aspect by month
 count_month = pd.DataFrame(avalanche.groupby(['month','aspect']).count())
@@ -186,7 +187,7 @@ fig.update_layout(
 
         'yanchor': 'top'}, polar_radialaxis_ticksuffix='')
 
-fig.show()
+
 
 
 # In[17]: in February, avalanches were mostly in SE aspects
@@ -233,7 +234,7 @@ avalanche['avi_month_num'] = pd.DatetimeIndex(avalanche['avi_date'])
 avalanche['day_of_week'] = avalanche['avi_date'].dt.dayofweek
 avalanche['weekend_ind'] = 0
 avalanche.loc[avalanche['day_of_week'].isin([5, 6]), 'weekend_ind'] = 1
-#avalanche['int_month']= avalanche['avi_month_num'].astype(int)
+avalanche['avi_month_num']= pd.DatetimeIndex(avalanche['avi_date']).month
 
 #ensure all measurments are in ft
 
@@ -243,6 +244,25 @@ avalanche.loc[avalanche['day_of_week'].isin([5, 6]), 'weekend_ind'] = 1
 
 # In[20]: column to indicate whether or not there were deaths
 avalanche["Deaths"] = avalanche['no_killed'].apply(lambda x: 1 if x > 0 else 0)
+
+
+avalanche_bymonth = avalanche.filter(['dt_month','avalanche'])
+
+
+
+avalanche_bymonth = avalanche_bymonth.groupby(['dt_month']).sum().reset_index()
+
+avalanche_bymonth
+fig = go.Figure(
+    data=[go.Bar(y=avalanche_bymonth['avalanche'], x=['January','February','March',
+    'April','May','June','October','November','December'])],
+    layout=go.Layout(
+        title=go.layout.Title(text="Avalanches by Month")
+        )
+)
+
+fig.show()
+
 
 heatmap = avalanche.drop(columns = ['acc_id','avalanche', 'no_killed','no_injured','no_non_crit'] )
 
@@ -256,16 +276,3 @@ plt.xticks(range(len(avicorr.columns)), avicorr.columns)
 #Apply yticks
 plt.yticks(range(len(avicorr.columns)), avicorr.columns)
 #show plot
-
-avalanche_bymonth = avalanche.filter(['int_month','avalanche'])
-
-
-
-avalanche_bymonth = avalanche_bymonth.groupby(['int_month']).sum().reset_index()
-avalanche_bymonth
-
-fig = go.Figure(
-    data=[go.Bar(y=avalanche_bymonth['avalanche'])],
-    layout_title_text="A Figure Displayed with fig.show()",
-)
-fig.show()
