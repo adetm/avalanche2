@@ -1,5 +1,4 @@
 #Import packages
-
 import numpy as np
 import pandas as pd
 import math
@@ -28,16 +27,19 @@ avalanche_time['avi_date_time'] = pd.to_datetime(avalanche_time['avi_date_time']
 avalanche_time['time'] = (avalanche_time['avi_date_time'].dt.time)
 avalanche_time['time'] = pd.to_datetime(avalanche_time['time'], format='%H:%M:%S').dt.time
 avalanche_time_sort = avalanche_time.sort_values(by=['time'])
+
+#plot avalanche time distribution
 fig = fig = px.histogram(avalanche_time_sort, x="time", nbins=9, title='Time of Avalanche Distribution')
 fig.show()
 
 
 #scatter plot
-#filter df to simplify
+#filter df columns to simplify
 rose_scatter = avalanche[['site_elev','aspect','travel_mode.1']]
 #drop na
 rose_scatter = rose_scatter.dropna()
 
+#change aspect to degrees for ordering
 def set_order(row):
     if row["aspect"] == 'N':
         return 0
@@ -60,11 +62,12 @@ def set_order(row):
 
 rose_scatter = rose_scatter.assign(order = rose_scatter.apply(set_order,axis=1))
 
+#group by aspect of occurrence
 count_aspect = pd.DataFrame(avalanche.groupby('aspect').count()['avalanche']).reset_index()
 count_aspect = count_aspect.rename(columns={"avalanche": "Count"})
 
-fig6= px.bar_polar(count_aspect, r=count_aspect['Count'], theta=['N','NE','E','SE','S','SW','W','NW'],
+fig= px.bar_polar(count_aspect, r=count_aspect['Count'], theta=['N','NE','E','SE','S','SW','W','NW'],
                    color="Count", template="ggplot2"
                    )
-fig6.update_layout(title_text="Avalanches by Aspect (2009-2020)")
-fig6.show() 
+fig.update_layout(title_text="Avalanches by Aspect (2009-2020)")
+fig.show()
