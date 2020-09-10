@@ -35,7 +35,7 @@ fig.show()
 
 #scatter plot
 #filter df columns to simplify
-rose_scatter = avalanche[['site_elev','aspect','travel_mode.1']]
+rose_scatter = avalanche[['site_elev','aspect','travel_mode.1','avalanche']]
 #drop na
 rose_scatter = rose_scatter.dropna()
 
@@ -61,12 +61,14 @@ def set_order(row):
         return null
 
 rose_scatter = rose_scatter.assign(order = rose_scatter.apply(set_order,axis=1))
-
+rose_scatter
 #group by aspect of occurrence
-count_aspect = pd.DataFrame(avalanche.groupby('aspect').count()['avalanche']).reset_index()
-count_aspect = count_aspect.rename(columns={"avalanche": "Count"})
+count_aspect = pd.DataFrame(rose_scatter.groupby('order').count()['avalanche']).reset_index()
+count_aspect = count_aspect.rename(columns={"avalanche": "Count","order": "Degrees"})
 
-fig= px.bar_polar(count_aspect, r=count_aspect['Count'], theta=['N','NE','E','SE','S','SW','W','NW'],
+count_aspect
+
+fig= px.bar_polar(count_aspect, r=count_aspect['Count'], theta=count_aspect['Degrees'],
                    color="Count", template="ggplot2"
                    )
 fig.update_layout(title_text="Avalanches by Aspect (2009-2020)")
